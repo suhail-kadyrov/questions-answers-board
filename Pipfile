@@ -9,6 +9,7 @@ djangorestframework = "*"
 cloudinary = "*"
 whitenoise = "*"
 django-import-export = "*"
+djangorestframework-simplejwt = "*"
 
 [dev-packages]
 
