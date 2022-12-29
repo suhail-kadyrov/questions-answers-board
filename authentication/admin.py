@@ -6,12 +6,13 @@ from authentication.models import CustomUser
 
 class CustomUserAdmin(UserAdmin):
     fieldsets = (
-        (None, {"fields": ("email", "password")}),
-        (_("Personal info"), {"fields": ("full_name",)}),
+        (None, {"fields": ("email", "password", "auth_provider")}),
+        (_("Personal info"), {"fields": ("full_name", "image")}),
         (
             _("Permissions"),
             {
                 "fields": (
+                    "role",
                     "is_verified",
                     "is_active",
                     "is_staff",
@@ -24,11 +25,12 @@ class CustomUserAdmin(UserAdmin):
         (_("Important dates"), {"fields": ("last_login", "date_joined")}),
     )
     add_fieldsets = (
-        (None, {"classes": ("wide",), "fields": ("email", "full_name", "password1", "password2")}),
+        (None, {"classes": ("wide",), "fields": ("email", "full_name", "role", "auth_provider", "image", "password1", "password2")}),
     )
-    list_display = ("email", "full_name", "is_verified", "is_staff")
+    list_display = ("email", "full_name", "role", "auth_provider", "is_verified", "is_staff")
     search_fields = ("email", "full_name")
     ordering = ("email",)
+    list_filter = ('role', 'is_verified',)
 
 
 admin.site.register(CustomUser, CustomUserAdmin)

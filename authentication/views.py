@@ -1,18 +1,20 @@
-from django.contrib.sites.shortcuts import get_current_site
-from django.urls import reverse
-from rest_framework import generics, status, views
+import jwt
+from django.conf import settings
+from django.contrib.auth.tokens import PasswordResetTokenGenerator
+from django.http import HttpResponsePermanentRedirect
+from django.utils.encoding import DjangoUnicodeDecodeError, smart_str
+from django.utils.http import urlsafe_base64_decode
+from rest_framework import generics, status, views, permissions
 from rest_framework.response import Response
-from rest_framework_simplejwt.tokens import RefreshToken
 
 from authentication.models import CustomUser
-from authentication.serializers import SignUpSerializer
-from authentication.utils import Email
+from authentication.serializers import *
+from authentication.utils import PasswordReset, Verification
 
 
 class SignUpView(generics.GenericAPIView):
 
     serializer_class = SignUpSerializer
-    # renderer_classes = (UserRenderer,)
 
     def post(self, request):
         user = request.data
@@ -23,24 +25,96 @@ class SignUpView(generics.GenericAPIView):
         user_data = serializer.data
         user = CustomUser.objects.get(email=user_data['email'])
 
-        token = RefreshToken.for_user(user).access_token
-
-        doamin = get_current_site(request).domain
-
-        path = reverse('verify')
-        url = 'http://{}{}?token={}'.format(doamin, path, token)
-
-        body = 'Hi, {}! Click on the link below to activate your account on "Questions & answers board":\n\n{}'.format(user.full_name, url)
-        data = {
-            'subject': 'Verify your email',
-            'body': body,
-            'to': user.email
-        }
-
-        Email.send(data)
+        Verification.send_email(user, request)
+        
         return Response(user_data, status=status.HTTP_201_CREATED)
 
 
 class EmailVerifyView(views.APIView):
-    def get(self, request):
-        pass
+     def get(self, request):
+        token = request.query_params.get('token')
+        try:
+            payload = jwt.decode(token, settings.SECRET_KEY, algorithms='HS256')
+            user = CustomUser.objects.get(id=payload['user_id'])
+        except jwt.ExpiredSignatureError:
+            return Response({'error': 'Expired link'}, status=status.HTTP_400_BAD_REQUEST)
+        except jwt.exceptions.DecodeError:
+            return Response({'error': 'Invalid token'}, status=status.HTTP_400_BAD_REQUEST)
+        except CustomUser.DoesNotExist:
+            return Response({'error': 'User is not found'}, status=status.HTTP_404_NOT_FOUND)
+        else:
+            if not user.is_verified:
+                user.is_verified = True
+                user.save()
+            return HttpResponsePermanentRedirect('https://q-a-board.netlify.app')
+
+
+class LoginView(generics.GenericAPIView):
+    serializer_class = LoginSerializer
+
+    def post(self, request):
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class PasswordResetView(generics.GenericAPIView):
+    serializer_class = PasswordResetSerializer
+
+    def post(self, request):
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        email = serializer.data.get('email')
+
+        if CustomUser.objects.filter(email=email).exists():
+            user = CustomUser.objects.get(email=email)
+            PasswordReset.send_email(user, request)
+
+        return Response({'success': 'A link to reset your password has been sent to your email.'}, status=status.HTTP_200_OK)
+
+
+class PasswordResetConfirmView(views.APIView):
+    def get(self, request, uidb64, token):
+
+        redirect_url = request.query_params.get('redirect_url')
+
+        try:
+            id = smart_str(urlsafe_base64_decode(uidb64))
+            user = CustomUser.objects.get(id=id)
+
+            if not PasswordResetTokenGenerator().check_token(user, token):
+                if redirect_url:
+                    return HttpResponsePermanentRedirect(redirect_url+'?token_valid=False')
+            else:
+                if redirect_url:
+                    return HttpResponsePermanentRedirect(redirect_url+'?token_valid=True&uidb64='+uidb64+'&token='+token)
+        except DjangoUnicodeDecodeError:
+            try:
+                if not PasswordResetTokenGenerator().check_token(user):
+                    return HttpResponsePermanentRedirect(redirect_url+'?token_valid=False')
+            except UnboundLocalError as e:
+                return Response({'error': 'Invalid token'}, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+class PasswordResetCompleteView(generics.GenericAPIView):
+    serializer_class = PasswordResetCompleteSerializer
+
+    def patch(self, request):
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        return Response({'message': 'success'}, status=status.HTTP_200_OK)
+
+
+class LogoutView(generics.GenericAPIView):
+    serializer_class = LogoutSerializer
+
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def post(self, request):
+
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(status=status.HTTP_204_NO_CONTENT)

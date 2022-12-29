@@ -10,6 +10,8 @@ cloudinary = "*"
 whitenoise = "*"
 django-import-export = "*"
 djangorestframework-simplejwt = "*"
+drf-yasg = "*"
+django-cors-headers = "*"
 
 [dev-packages]
 
