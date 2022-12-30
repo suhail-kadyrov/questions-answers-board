@@ -19,6 +19,7 @@ schema_view = get_schema_view(
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/v1/auth/', include('authentication.urls')),
+    path('api/v1/profile/', include('profiles.urls')),
     
     path('api/v1/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-swagger-ui'),
 ]
