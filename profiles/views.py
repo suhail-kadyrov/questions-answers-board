@@ -22,7 +22,7 @@ class ProfileView(generics.GenericAPIView):
         request.user.image = serializer.validated_data.get('image')
         request.user.full_name = serializer.validated_data.get('full_name')
         request.user.save()
-        return Response({})
+        return Response(self.serializer_class(request.user).data, status=status.HTTP_200_OK)
 
 
 class SetEmailView(generics.GenericAPIView):

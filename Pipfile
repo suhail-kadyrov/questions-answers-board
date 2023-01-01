@@ -12,6 +12,10 @@ django-import-export = "*"
 djangorestframework-simplejwt = "*"
 drf-yasg = "*"
 django-cors-headers = "*"
+djangochannelsrestframework = "*"
+environs = "*"
+channels = {extras = ["daphne"], version = "*"}
+channels-redis = "*"
 
 [dev-packages]
 

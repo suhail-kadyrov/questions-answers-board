@@ -1,0 +1,72 @@
+<!-- chat/templates/chat/room.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <title>Chat Room</title>
+</head>
+<body>
+    <textarea id="chat-log" cols="100" rows="20"></textarea><br>
+    <input id="chat-message-input" type="text" size="100"><br>
+    <input id="chat-message-submit" type="button" value="Send">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.2.2/axios.min.js" integrity="sha512-QTnb9BQkG4fBYIt9JGvYmxPpd6TBeKp6lsUrtiVQsrJ9sb33Bn9s0wMQO9qVBFbPX3xHRAsBHvXlcsrnJjExjg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <!-- {{ room_name|json_script:"room-name" }} -->
+    <script>
+        // const roomName = JSON.parse(document.getElementById('room-name').textContent);
+        let items = window.location.href.split('/'),
+            lastItem = items.length - 1,
+            type = items[lastItem - 2],
+            id = items[lastItem - 1];
+
+        const mySocket = new WebSocket(
+            'ws://'
+            + window.location.host
+            + '/ws/notifications/'
+            + type
+            + '/'
+            + id
+            + '/'
+        );
+
+        // chatSocket.onmessage = function(e) {
+        //     const data = JSON.parse(e.data);
+        //     document.querySelector('#chat-log').value += (data.message + '\n');
+        //     console.log(data);
+        // };
+
+        // chatSocket.onclose = function(e) {
+        //     console.error('Chat socket closed unexpectedly');
+        // };
+
+        document.querySelector('#chat-message-input').focus();
+        document.querySelector('#chat-message-input').onkeyup = function(e) {
+            if (e.keyCode === 13) {  // enter, return
+                document.querySelector('#chat-message-submit').click();
+            }
+        };
+
+        document.querySelector('#chat-message-submit').onclick = async function(e) {
+            const messageInputDom = document.querySelector('#chat-message-input');
+            const message = messageInputDom.value;
+            await axios.get('http://127.0.0.1:8000/api/v1/notifications/new/?name=' + message)
+            .then(response => {
+                const chatSocket = new WebSocket(
+                    'ws://'
+                    + window.location.host
+                    + '/ws/notifications/'
+                    + 'professor'
+                    + '/'
+                    + '2'
+                    + '/'
+                );
+                chatSocket.send(JSON.stringify({
+                    'message': message
+                }));
+                messageInputDom.value = '';
+            }).catch(error => {
+                console.log(error);
+            })
+        };
+    </script>
+</body>
+</html>

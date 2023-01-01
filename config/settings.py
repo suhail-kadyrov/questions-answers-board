@@ -10,13 +10,16 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
+from datetime import timedelta
 from pathlib import Path
 
 import cloudinary
-import cloudinary.uploader
 import cloudinary.api
+import cloudinary.uploader
+from environs import Env
 
-from datetime import timedelta
+env = Env()
+env.read_env()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -26,7 +29,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-okbd7t=7(e0=xqhfzs(7)c8$e$z8wl$u$w44m_e=bie2%fyszh'
+SECRET_KEY = env.str("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -37,6 +40,8 @@ ALLOWED_HOSTS = ['*']
 # Application definition
 
 INSTALLED_APPS = [
+    'daphne',
+
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -46,6 +51,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'rest_framework',
+    'channels',
     'rest_framework_simplejwt.token_blacklist',
     'corsheaders',
     'drf_yasg',
@@ -100,6 +106,13 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
+ASGI_APPLICATION = 'config.asgi.application'
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer"
+   }
+}
 
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
@@ -147,15 +160,14 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [str(BASE_DIR.joinpath('static'))]
 STATIC_ROOT = str(BASE_DIR.joinpath('staticfiles'))
 STATICFILES_STORAGE ='whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Cloudinary config
 cloudinary.config(
-    cloud_name = "gozalina",
-    api_key = "886857271728495",
-    api_secret = "NTGhT5E6W3vOeMfQRYX-g4P1k2c"
+    cloud_name = env.str("CLOUDINARY_NAME"),
+    api_key = env.str("CLOUDINARY_KEY"),
+    api_secret = env.str("CLOUDINARY_SECRET")
 )
 
 # Default primary key field type
@@ -167,8 +179,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 EMAIL_USE_TLS = True
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
-EMAIL_HOST_USER = 'goldeneaglef5@gmail.com'
-EMAIL_HOST_PASSWORD = 'zifuimhkmdluvmxj'
+EMAIL_HOST_USER = env.str("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = env.str("EMAIL_HOST_PASSWORD")
 
 
 SIMPLE_JWT = {
@@ -199,4 +211,5 @@ SWAGGER_SETTINGS = {
 }
 
 
-SOCIAL_AUTH_PASSWORD = 'ABCD1234'
+SOCIAL_AUTH_PASSWORD = env.str("SOCIAL_AUTH_PASSWORD")
+DJANGO_CHANNELS_REST_API = {}

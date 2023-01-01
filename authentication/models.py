@@ -18,7 +18,7 @@ class CustomUser(AbstractUser):
     full_name = models.CharField(max_length=64)
     role = models.CharField(max_length=10, choices=USER_ROLE_CHOICES, default='STUDENT')
     is_verified = models.BooleanField(default=False)
-    image = CloudinaryField('image', null=True, blank=True, folder='qab_users/')
+    image = CloudinaryField('image', null=True, blank=True, folder='q-a-board-users/')
     auth_provider = models.CharField(max_length=255, blank=False, null=False, default='email')
 
     USERNAME_FIELD = "email"
