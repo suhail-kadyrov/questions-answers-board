@@ -1,3 +1,6 @@
 from django.contrib import admin
+from course.models import *
 
-# Register your models here.
+@admin.register(Course)
+class CourseViewsAdmin(admin.ModelAdmin):
+    list_display = ['name','id','semester',]
