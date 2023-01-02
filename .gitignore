@@ -10,3 +10,4 @@ env.bak/
 venv.bak/
 .idea
 req.txt
+__pycache__
