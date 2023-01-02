@@ -3,14 +3,14 @@ from authentication.utils import Verification
 from rest_framework import status, generics
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from profiles.permissions import VerifiedUser
+from profiles.permissions import IsVerifiedUser
 
 from profiles.serializers import *
 
 
 class ProfileView(generics.GenericAPIView):
     serializer_class = ProfileSerializer
-    permission_classes = [IsAuthenticated, VerifiedUser]
+    permission_classes = [IsAuthenticated, IsVerifiedUser]
 
     def get(self, request):
         serializer = self.serializer_class(request.user)
@@ -27,7 +27,7 @@ class ProfileView(generics.GenericAPIView):
 
 class SetEmailView(generics.GenericAPIView):
     serializer_class = EmailSerializer
-    permission_classes = [IsAuthenticated, VerifiedUser]
+    permission_classes = [IsAuthenticated, IsVerifiedUser]
 
     def patch(self, request):
         serializer = self.serializer_class(data=request.data)
@@ -44,7 +44,7 @@ class SetEmailView(generics.GenericAPIView):
 
 class SetPasswordView(generics.GenericAPIView):
     serializer_class = PasswordSerializer
-    permission_classes = [IsAuthenticated, VerifiedUser]
+    permission_classes = [IsAuthenticated, IsVerifiedUser]
 
     def patch(self, request):
         serializer = self.serializer_class(data=request.data)
