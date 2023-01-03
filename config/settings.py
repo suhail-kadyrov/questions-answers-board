@@ -1,4 +1,3 @@
-
 from datetime import timedelta
 from pathlib import Path
 
@@ -49,6 +48,8 @@ INSTALLED_APPS = [
     'authentication',
     'notifications',
     'profiles',
+    'chat',
+    'question'
     'course'
 ]
 
@@ -101,7 +102,7 @@ ASGI_APPLICATION = 'config.asgi.application'
 CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels.layers.InMemoryChannelLayer"
-   }
+    }
 }
 
 # Database
@@ -109,8 +110,15 @@ CHANNEL_LAYERS = {
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        # 'ENGINE': 'django.db.backends.sqlite3',
+        # 'NAME': BASE_DIR / 'db.sqlite3',
+
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': env.str("DB_NAME"),
+        'USER': env.str("DB_USER"),
+        'PASSWORD': env.str("DB_PASSWORD"),
+        'HOST': env.str("DB_HOST"),
+        'PORT': '5432',
     }
 }
 
@@ -202,4 +210,4 @@ SWAGGER_SETTINGS = {
 
 
 SOCIAL_AUTH_PASSWORD = env.str("SOCIAL_AUTH_PASSWORD")
-DJANGO_CHANNELS_REST_API = {}
+FRONT_END_URL = ''
