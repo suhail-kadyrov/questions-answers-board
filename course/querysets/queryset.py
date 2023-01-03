@@ -12,7 +12,7 @@ class CourseQuerySet(QuerySet):
                 'name': item.name,
                 'semester':item.semester,
                 'is_complated':item.is_completed,
-                'started_at':item.started_at,
+                'started_at':item.started_at
             })
         return list(list_course)
 

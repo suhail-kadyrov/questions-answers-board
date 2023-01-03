@@ -15,4 +15,4 @@ class Course(models.Model):
     objects = CourseManager()
 
     def __str__(self):
-        return f"Course: {self.name} ,Semester: {self.semester}"
+        return self.name

@@ -31,9 +31,9 @@ class CourseSerializers(serializers.ModelSerializer):
         create_course.token = new_token
         create_course.save()
         return create_course
-    def update(self,instance, validated_data):
+
+    def update(self,instance,validated_data):
         instance.name = validated_data.get('name',instance.name)
         instance.semester = validated_data.get('semester',instance.semester)
-        instance.is_completed = validated_data['is_completed',instance.is_completed]
         instance.save()
         return instance
