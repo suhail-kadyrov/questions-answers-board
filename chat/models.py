@@ -1,12 +1,9 @@
 from django.db import models
 from authentication.models import CustomUser
-
+from course.models import Course
 from question.models import Question
 
 # Create your models here.
-class Course(models.Model):
-    name = models.CharField(max_length=16)
-
 class Thread(models.Model):
     title = models.ForeignKey(Question, on_delete=models.CASCADE)
     course = models.ForeignKey(Course, on_delete=models.CASCADE)

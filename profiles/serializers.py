@@ -5,6 +5,7 @@ from authentication.models import CustomUser
 class ProfileSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(read_only=True)
     role = serializers.CharField(read_only=True)
+    image = serializers.ImageField(allow_empty_file=True, use_url=True, required=False)
 
     class Meta:
         model = CustomUser

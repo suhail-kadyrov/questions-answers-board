@@ -1,5 +1,4 @@
 from django.db import models
-from numpy.distutils.system_info import blas_info
 
 from authentication.models import CustomUser
 from course.querysets.queryset import *

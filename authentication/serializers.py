@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib import auth
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.utils.encoding import force_str
@@ -7,6 +8,7 @@ from rest_framework.exceptions import AuthenticationFailed
 from rest_framework_simplejwt.tokens import RefreshToken, TokenError
 
 from authentication.models import CustomUser
+from authentication.utils import Google
 
 
 class SignUpSerializer(serializers.ModelSerializer):
@@ -25,7 +27,7 @@ class LoginSerializer(serializers.ModelSerializer):
     password = serializers.CharField(max_length=32, min_length=8, write_only=True)
     full_name = serializers.CharField(max_length=64, min_length=1, read_only=True)
     role = serializers.CharField(max_length=10, min_length=5, read_only=True)
-    image = serializers.CharField(read_only=True)
+    image = serializers.ImageField(allow_empty_file=True, use_url=True, read_only=True)
     tokens = serializers.SerializerMethodField()
 
     def get_tokens(self, obj):
@@ -64,10 +66,9 @@ class LoginSerializer(serializers.ModelSerializer):
 
 class PasswordResetSerializer(serializers.Serializer):
     email = serializers.EmailField(min_length=2)
-    redirect_url = serializers.CharField(max_length=500, write_only=True)
 
     class Meta:
-        fields = ['email', 'redirect_url']
+        fields = ['email',]
 
 
 class PasswordResetCompleteSerializer(serializers.Serializer):
@@ -112,3 +113,24 @@ class LogoutSerializer(serializers.Serializer):
             RefreshToken(self.token).blacklist()
         except TokenError:
             self.fail('bad_token')
+
+
+class GoogleSerializer(serializers.Serializer):
+    id_token = serializers.CharField()
+
+    def validate_id_token(self, id_token):
+        user_data = Google.validate(id_token)
+        try:
+            user_data['sub']
+        except:
+            raise serializers.ValidationError('The token is invalid or expired. Please login again.')
+
+        if user_data['aud'] != settings.GOOGLE_CLIENT_ID:
+            raise AuthenticationFailed('oops, who are you?')
+
+        user_id = user_data['sub']
+        email = user_data['email']
+        name = user_data['name']
+        provider = 'google'
+
+        return Google.authenticate(provider=provider, user_id=user_id, email=email, name=name)

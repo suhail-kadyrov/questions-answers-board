@@ -37,16 +37,16 @@ class EmailVerifyView(views.APIView):
             payload = jwt.decode(token, settings.SECRET_KEY, algorithms='HS256')
             user = CustomUser.objects.get(id=payload['user_id'])
         except jwt.ExpiredSignatureError:
-            return Response({'error': 'Expired link'}, status=status.HTTP_400_BAD_REQUEST)
+            return HttpResponsePermanentRedirect(settings.FRONTEND_URL + '/verified?error=Expired%20link')
         except jwt.exceptions.DecodeError:
-            return Response({'error': 'Invalid token'}, status=status.HTTP_400_BAD_REQUEST)
+            return HttpResponsePermanentRedirect(settings.FRONTEND_URL + '/verified?error=Invalid%20token')
         except CustomUser.DoesNotExist:
-            return Response({'error': 'User is not found'}, status=status.HTTP_404_NOT_FOUND)
+            return HttpResponsePermanentRedirect(settings.FRONTEND_URL + '/verified?error=User%20is%20not%20found')
         else:
             if not user.is_verified:
                 user.is_verified = True
                 user.save()
-            return HttpResponsePermanentRedirect('https://q-a-board.netlify.app')
+            return HttpResponsePermanentRedirect(settings.FRONTEND_URL + '/verified')
 
 
 class LoginView(generics.GenericAPIView):
@@ -84,17 +84,16 @@ class PasswordResetConfirmView(views.APIView):
 
             if not PasswordResetTokenGenerator().check_token(user, token):
                 if redirect_url:
-                    return HttpResponsePermanentRedirect(redirect_url+'?token_valid=False')
+                    return HttpResponsePermanentRedirect(redirect_url)
             else:
                 if redirect_url:
-                    return HttpResponsePermanentRedirect(redirect_url+'?token_valid=True&uidb64='+uidb64+'&token='+token)
+                    return HttpResponsePermanentRedirect(redirect_url+'?uidb64='+uidb64+'&token='+token)
         except DjangoUnicodeDecodeError:
             try:
                 if not PasswordResetTokenGenerator().check_token(user):
-                    return HttpResponsePermanentRedirect(redirect_url+'?token_valid=False')
+                    return HttpResponsePermanentRedirect(redirect_url)
             except UnboundLocalError as e:
-                return Response({'error': 'Invalid token'}, status=status.HTTP_400_BAD_REQUEST)
-
+                return HttpResponsePermanentRedirect(redirect_url)
 
 
 class PasswordResetCompleteView(generics.GenericAPIView):
@@ -108,7 +107,6 @@ class PasswordResetCompleteView(generics.GenericAPIView):
 
 class LogoutView(generics.GenericAPIView):
     serializer_class = LogoutSerializer
-
     permission_classes = (permissions.IsAuthenticated,)
 
     def post(self, request):
@@ -118,3 +116,12 @@ class LogoutView(generics.GenericAPIView):
         serializer.save()
 
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class GoogleAuthView(generics.GenericAPIView):
+    serializer_class = GoogleSerializer
+
+    def post(self, request):
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        return Response(serializer.validated_data['id_token'], status=status.HTTP_200_OK)

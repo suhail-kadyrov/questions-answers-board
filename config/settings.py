@@ -49,7 +49,7 @@ INSTALLED_APPS = [
     'notifications',
     'profiles',
     'chat',
-    'question'
+    'question',
     'course'
 ]
 
@@ -186,17 +186,21 @@ SIMPLE_JWT = {
     'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
 }
 
+FRONTEND_URL = env.str("FRONTEND_URL")
 
 CORS_ORIGIN_WHITELIST = [
     "http://localhost:3000",
-    "https://relaxed-curie-e9a516.netlify.app",
-    "http://127.0.0.1:8080"
+    "https://question-and-answer-board.netlify.app",
+    "http://localhost:8080",
+    "http://127.0.0.1:8080",
+    FRONTEND_URL
 ]
 
 CORS_ORIGIN_REGEX_WHITELIST = [
     r"^https://\w+\.netlify\.app$",
 ]
 
+CSRF_TRUSTED_ORIGINS = [env.str("BACKEND_URL"),]
 
 SWAGGER_SETTINGS = {
     'SECURITY_DEFINITIONS': {
@@ -208,6 +212,5 @@ SWAGGER_SETTINGS = {
     }
 }
 
-
+GOOGLE_CLIENT_ID = env.str("GOOGLE_CLIENT_ID")
 SOCIAL_AUTH_PASSWORD = env.str("SOCIAL_AUTH_PASSWORD")
-FRONT_END_URL = ''
