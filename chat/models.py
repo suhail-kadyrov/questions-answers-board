@@ -15,3 +15,4 @@ class Message(models.Model):
     text = models.CharField(max_length=2048)
     sent_at = models.DateTimeField(auto_now_add=True)
     sender = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    reply_to_message = models.ForeignKey('Message', on_delete=models.SET_NULL, null=True, blank=True)

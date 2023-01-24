@@ -4,12 +4,13 @@ from authentication.models import CustomUser
 
 class ProfileSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(read_only=True)
+    auth_provider = serializers.CharField(read_only=True)
     role = serializers.CharField(read_only=True)
-    image = serializers.ImageField(allow_empty_file=True, use_url=True, required=False)
+    image = serializers.ImageField(allow_empty_file=True, use_url=True, read_only=True)
 
     class Meta:
         model = CustomUser
-        fields = ['id', 'email', 'full_name', 'role', 'image']
+        fields = ['id', 'email', 'auth_provider', 'full_name', 'role', 'image']
     
 
 class PasswordSerializer(serializers.Serializer):

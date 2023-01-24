@@ -24,6 +24,7 @@ class SignUpSerializer(serializers.ModelSerializer):
 
 class LoginSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(max_length=255, min_length=3)
+    auth_provider = serializers.CharField(max_length=6, min_length=5, read_only=True)
     password = serializers.CharField(max_length=32, min_length=8, write_only=True)
     full_name = serializers.CharField(max_length=64, min_length=1, read_only=True)
     role = serializers.CharField(max_length=10, min_length=5, read_only=True)
@@ -40,7 +41,7 @@ class LoginSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CustomUser
-        fields = ['id', 'email', 'full_name', 'role', 'image', 'password', 'tokens']
+        fields = ['id', 'email', 'auth_provider', 'full_name', 'role', 'image', 'password', 'tokens']
 
     def validate(self, attrs):
         email = attrs.get('email', '')
@@ -57,6 +58,7 @@ class LoginSerializer(serializers.ModelSerializer):
         return {
             'id': user.id,
             'email': user.email,
+            'auth_provider': user.auth_provider,
             'full_name': user.full_name,
             'role': user.role,
             'image': user.image,

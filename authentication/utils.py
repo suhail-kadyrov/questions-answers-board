@@ -109,8 +109,9 @@ class Google:
         return {
             'id': authenticated_user.id,
             'email': authenticated_user.email,
+            'auth_provider': authenticated_user.auth_provider,
             'full_name': authenticated_user.full_name,
             'role': authenticated_user.role,
-            'image': authenticated_user.image,
+            'image': authenticated_user.image.url,
             'tokens': authenticated_user.tokens()
         }
