@@ -1,8 +1,9 @@
-from django.db import models
-from django.core.exceptions import ObjectDoesNotExist
-from django.db.models.query import QuerySet
-from course.models import Course
 from chat.models import *
+from course.models import Course
+from django.core.exceptions import ObjectDoesNotExist
+from django.db import models
+from django.db.models.query import QuerySet
+
 
 class CourseQuerySet(QuerySet):
     def courses(self,user):

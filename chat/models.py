@@ -1,7 +1,8 @@
-from django.db import models
 from authentication.models import CustomUser
 from course.models import Course
+from django.db import models
 from question.models import Question
+
 
 # Create your models here.
 class Thread(models.Model):
@@ -15,4 +16,5 @@ class Message(models.Model):
     text = models.CharField(max_length=2048)
     sent_at = models.DateTimeField(auto_now_add=True)
     sender = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    is_edited = models.BooleanField(default=False)
     reply_to_message = models.ForeignKey('Message', on_delete=models.SET_NULL, null=True, blank=True)

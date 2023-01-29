@@ -1,8 +1,11 @@
-from rest_framework import serializers
 from uuid import uuid4
+
 from authentication.models import *
-from course.models import *
+from notifications.models import Notification
 from profiles.serializers import ProfileSerializer
+from rest_framework import serializers
+
+from course.models import *
 
 
 class CoursesListSerializers(serializers.ModelSerializer):
@@ -11,10 +14,14 @@ class CoursesListSerializers(serializers.ModelSerializer):
     semester = serializers.CharField(max_length=150)
     started_at = serializers.DateField()
     is_completed = serializers.BooleanField(default=False)
+    students = serializers.SerializerMethodField()
+
+    def get_students(self, obj):
+        return obj.students.count()
 
     class Meta:
         model = Course
-        fields = ['id', 'name', 'professor', 'semester', 'started_at', 'is_completed',]
+        fields = ['id', 'name', 'professor', 'semester', 'started_at', 'is_completed', 'students']
 
 
 class CourseSerializer(serializers.ModelSerializer):
@@ -29,16 +36,24 @@ class CourseSerializer(serializers.ModelSerializer):
             started_at = validated_data['started_at'],
             professor = self.context.get('user')
         )
-        new_token = uuid4()
-        while bool(Course.objects.filter(token=new_token)):
-            new_token = uuid4()
-        course.token = new_token
         course.students.set(validated_data['students'])
         course.save()
+        notification = list(map(
+            lambda s: Notification(
+                name='STUDENT_INVITED',
+                text=f'{course.professor.full_name} has invited you to {course.name}',
+                receiver=s,
+                user=course.professor,
+                course=course,
+            ),
+            validated_data['students']
+        ))
+        Notification.objects.bulk_create(notification)
+        Notification.objects.create(
+            name='ADMIN_NEW_COURSE',
+            text=f'{course.professor.full_name} has created new course - {course.name}',
+            receiver=CustomUser.objects.get(role='ADMIN'),
+            user=course.professor,
+            course=course,
+        )
         return course
-
-    # def update(self, instance, validated_data):
-    #     instance.name = validated_data.get('name', instance.name)
-    #     instance.semester = validated_data.get('semester', instance.semester)
-    #     instance.save()
-    #     return instance

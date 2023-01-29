@@ -1,5 +1,5 @@
-from rest_framework import serializers
 from authentication.models import CustomUser
+from rest_framework import serializers
 
 
 class ProfileSerializer(serializers.ModelSerializer):
@@ -11,6 +11,14 @@ class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
         fields = ['id', 'email', 'auth_provider', 'full_name', 'role', 'image']
+
+
+class ImageSerializer(serializers.ModelSerializer):
+    image = serializers.ImageField(allow_empty_file=True, use_url=True, required=False)
+
+    class Meta:
+        model = CustomUser
+        fields = ['image']
     
 
 class PasswordSerializer(serializers.Serializer):

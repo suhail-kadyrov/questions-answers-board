@@ -1,5 +1,6 @@
-from django.db import models
 from authentication.models import CustomUser
+from django.db import models
+
 
 # Create your models here.
 class Question(models.Model):

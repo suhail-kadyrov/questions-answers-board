@@ -25,9 +25,9 @@
             id = items[lastItem - 1];
 
         const chatSocket = new WebSocket(
-            'wss://'
+            'ws://'
             + window.location.host
-            + '/ws/notifications/'
+            + '/ws/'
             + type
             + '/'
             + id
@@ -37,9 +37,9 @@
         chatSocket.onmessage = function(e) {
             const data = JSON.parse(e.data);
             // document.querySelector('#chat-log').value += (data.message + '\n');
-            console.log(e);
+            console.log(e.is_message);
             console.log(data);
-            document.getElementById('result').innerHTML = e.data;
+            document.getElementById('result').innerHTML += e.data;
         };
 
         chatSocket.onclose = function(e) {

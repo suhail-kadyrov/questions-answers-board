@@ -1,8 +1,9 @@
-from .models import Notification
-from rest_framework import serializers
-from profiles.serializers import ProfileSerializer
-from course.serializers import CourseSerializer
 from chat.serializers import *
+from course.serializers import CourseSerializer
+from profiles.serializers import ProfileSerializer
+from rest_framework import serializers
+
+from .models import Notification
 
 
 class NotificationSerializer(serializers.ModelSerializer):

@@ -13,7 +13,6 @@ from authentication.utils import PasswordReset, Verification
 
 
 class SignUpView(generics.GenericAPIView):
-
     serializer_class = SignUpSerializer
 
     def post(self, request):
