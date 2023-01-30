@@ -11,6 +11,4 @@ urlpatterns = [
     path('auto_answer/', AutoAnswerSettingsView.as_view()),
     path('course/<int:pk>/', AdminCourseDetailView.as_view()),
     path('user/<int:pk>/', AdminUserDestroyView.as_view()),
-    # path('<int:pk>/', CourseDetailView.as_view()),
-    # path('students/', StudentsListView.as_view()),
 ]

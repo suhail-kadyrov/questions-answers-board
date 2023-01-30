@@ -16,7 +16,7 @@ class ThreadDetailView(generics.GenericAPIView):
 
     def get(self, request, pk):
         thread = get_object_or_404(Thread, pk=pk)
-        messages = Message.objects.filter(thread=thread)
+        messages = Message.objects.filter(thread=thread).order_by('id')
         serializer = self.serializer_class(messages, many=True)
         return Response(serializer.data)
     
@@ -75,7 +75,7 @@ class MessageCreateView(generics.GenericAPIView):
             else:
                 Notification.objects.create(
                     name='PROFESSOR_NEW_QUESTION',
-                    text=f'You have new answer in {message.thread.course.name}',
+                    text=f'You have new question in {message.thread.course.name}',
                     receiver=message.thread.course.professor,
                     user=message.sender,
                     course=message.thread.course,
@@ -102,6 +102,7 @@ class MessageCreateView(generics.GenericAPIView):
                     }
                 }
             )
+        return Response({'data': serializer.data, 'answer': answer}, status=status.HTTP_200_OK)
 
 
 class MessageUpdateDestroyView(generics.GenericAPIView):

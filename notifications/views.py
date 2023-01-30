@@ -87,7 +87,7 @@ class StudentEnrollmentAnswerView(views.APIView):
         )
         return Response({'message': 'success'})
     
-    def delete(self, request):
+    def patch(self, request):
         student = get_object_or_404(CustomUser, id=request.data.get('user'))
         course = get_object_or_404(Course, id=request.data.get('course'))
         Notification.objects.create(
@@ -100,7 +100,7 @@ class StudentEnrollmentAnswerView(views.APIView):
 
 
 class ProfessorPromotionSentView(views.APIView):
-    def post(self, request, pk):
+    def post(self, request):
         Notification.objects.get_or_create(
             name='ADMIN_PROMOTION_REQUEST',
             text=f'{request.user.full_name} wants to become a professor',
@@ -127,7 +127,7 @@ class ProfessorPromotionAnswerView(views.APIView):
         )
         return Response({'message': 'success'})
     
-    def delete(self, request):
+    def patch(self, request):
         student = get_object_or_404(CustomUser, id=request.data.get('user'))
         Notification.objects.create(
             name='PROFESSOR_PROMOTION_REJECTED',

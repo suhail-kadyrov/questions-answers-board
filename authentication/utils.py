@@ -105,6 +105,11 @@ class Google:
                 password=settings.SOCIAL_AUTH_PASSWORD
             )
             authenticated_user = authenticate(email=email, password=settings.SOCIAL_AUTH_PASSWORD)
+
+        if authenticated_user.image:
+                image = authenticated_user.image.url
+        else:
+                image = None
         
         return {
             'id': authenticated_user.id,
@@ -112,6 +117,6 @@ class Google:
             'auth_provider': authenticated_user.auth_provider,
             'full_name': authenticated_user.full_name,
             'role': authenticated_user.role,
-            'image': authenticated_user.image.url,
+            'image': image,
             'tokens': authenticated_user.tokens()
         }

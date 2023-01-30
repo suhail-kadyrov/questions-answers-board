@@ -1,6 +1,7 @@
 from admin_user.models import AutoAnswerSetting
 from profiles.serializers import *
 from rest_framework import serializers
+from notifications.models import Notification
 
 from .models import *
 
@@ -16,19 +17,21 @@ class RepliedMessageSerializer(serializers.ModelSerializer):
 class MessageSerializer(serializers.ModelSerializer):
     sender = ProfileSerializer(read_only=True)
     reply_to_message = RepliedMessageSerializer(read_only=True)
+    is_edited = serializers.BooleanField(read_only=True)
 
     class Meta:
         model = Message
-        fields = ['id', 'thread', 'text', 'sent_at', 'sender', 'reply_to_message']
+        fields = ['id', 'thread', 'text', 'sent_at', 'is_edited', 'sender', 'reply_to_message']
 
 
 class MessageCreateSerializer(serializers.ModelSerializer):
     sender = ProfileSerializer(read_only=True)
     sent_at = serializers.DateTimeField(read_only=True)
+    is_edited = serializers.BooleanField(read_only=True)
 
     class Meta:
         model = Message
-        fields = ['id', 'thread', 'text', 'sender', 'reply_to_message', 'sent_at']
+        fields = ['id', 'thread', 'text', 'sender', 'is_edited', 'reply_to_message', 'sent_at']
 
 
 class MessageUpdateSerializer(serializers.ModelSerializer):
@@ -68,5 +71,14 @@ class ThreadSerializer(serializers.ModelSerializer):
                 text=question.answer,
                 sender=message.thread.course.professor,
                 reply_to_message=message
+            )
+        else:
+            Notification.objects.create(
+                name='PROFESSOR_NEW_QUESTION',
+                text=f'You have new question in {thread.course.name}',
+                receiver=thread.course.professor,
+                user=message.sender,
+                course=thread.course,
+                message=message
             )
         return thread
