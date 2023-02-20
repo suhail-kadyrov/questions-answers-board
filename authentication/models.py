@@ -20,6 +20,7 @@ class CustomUser(AbstractUser):
     is_verified = models.BooleanField(default=False)
     image = CloudinaryField('image', null=True, blank=True, folder='q-a-board-users/')
     auth_provider = models.CharField(max_length=255, blank=False, null=False, default='email')
+    face = CloudinaryField('face', null=True, blank=True, folder='q-a-board-users/faces/')
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = ['full_name']

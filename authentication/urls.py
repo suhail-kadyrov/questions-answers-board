@@ -12,5 +12,6 @@ urlpatterns = [
     path('reset_password/', PasswordResetView.as_view(), name ='reset_password'),
     path('reset/<uidb64>/<token>/', PasswordResetConfirmView.as_view(), name ='password_reset_confirm'),
     path('reset_password_complete/', PasswordResetCompleteView.as_view(), name ='password_reset_complete'),
-    path('google/', GoogleAuthView.as_view(), name ='google_auth')
+    path('google/', GoogleAuthView.as_view(), name ='google_auth'),
+    path('face/',FaceAuthView.as_view())
 ]

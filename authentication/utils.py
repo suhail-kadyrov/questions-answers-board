@@ -1,5 +1,7 @@
 import threading
+import time
 
+import face_recognition
 from django.conf import settings
 from django.contrib.auth import authenticate, tokens
 from django.contrib.sites.shortcuts import get_current_site
@@ -9,6 +11,7 @@ from django.utils.encoding import smart_bytes
 from django.utils.http import urlsafe_base64_encode
 from google.auth.transport import requests
 from google.oauth2 import id_token
+from PIL import Image, ImageDraw
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework_simplejwt.tokens import RefreshToken
 
@@ -120,3 +123,16 @@ class Google:
             'image': image,
             'tokens': authenticated_user.tokens()
         }
+
+
+class FaceRecognition:
+    @staticmethod
+    def compare_face(img1_path,img2_path):
+        img_1 = face_recognition.load_image_file(img1_path)
+        img1_encoding = face_recognition.face_encodings(img_1)[0]
+
+        img_2 = face_recognition.load_image_file(img2_path)
+        img2_encoding = face_recognition.face_encodings(img_2)[0]
+        
+        result = face_recognition.compare_faces([img1_encoding],img2_encoding)
+        return result

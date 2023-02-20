@@ -1,3 +1,4 @@
+import urllib
 from django.conf import settings
 from django.contrib import auth
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
@@ -8,7 +9,7 @@ from rest_framework.exceptions import AuthenticationFailed
 from rest_framework_simplejwt.tokens import RefreshToken, TokenError
 
 from authentication.models import CustomUser
-from authentication.utils import Google
+from authentication.utils import Google,FaceRecognition
 
 
 class SignUpSerializer(serializers.ModelSerializer):
@@ -136,3 +137,55 @@ class GoogleSerializer(serializers.Serializer):
         provider = 'google'
 
         return Google.authenticate(provider=provider, user_id=user_id, email=email, name=name)
+
+
+class FaceSerializer(serializers.Serializer):
+    email = serializers.EmailField(max_length=255, min_length=3)
+    face = serializers.ImageField(allow_empty_file=True, use_url=True)
+    
+    auth_provider = serializers.CharField(max_length=6, min_length=5, read_only=True)
+    full_name = serializers.CharField(max_length=64, min_length=1, read_only=True)
+    role = serializers.CharField(max_length=10, min_length=5, read_only=True)
+    image = serializers.ImageField(allow_empty_file=True, use_url=True, read_only=True)
+    tokens = serializers.SerializerMethodField()
+
+    def get_tokens(self, obj):
+        user = CustomUser.objects.get(email=obj['email'])
+        tokens = user.tokens()
+        return {
+            'refresh': tokens['refresh'],
+            'access': tokens['access']
+        }
+
+    class Meta:
+        fields = ['id', 'email', 'auth_provider', 'full_name', 'role', 'image', 'face', 'tokens']
+    
+    def validate(self,attrs):
+        user_email = attrs.get('email')
+        user_image = attrs.get('face')
+        users = CustomUser.objects.filter(email = user_email)
+        if users.exists():
+            user = users.first()
+            user_face = user.face
+            if user_face is None:
+                raise AuthenticationFailed('Face is not registered')
+            face = urllib.request.urlopen(user_face.url)
+            result = FaceRecognition.compare_face(face, user_image)
+            if result[0]:
+                if not user.is_active:
+                    raise AuthenticationFailed('Account disabled')
+                if not user.is_verified:
+                    raise AuthenticationFailed('Email is not verified')
+                return {
+                    'id': user.id,
+                    'email': user.email,
+                    'auth_provider': user.auth_provider,
+                    'full_name': user.full_name,
+                    'role': user.role,
+                    'image': user.image,
+                    'face': user.face,
+                    'tokens': user.tokens
+                }
+            raise AuthenticationFailed('Face does not match')
+        raise AuthenticationFailed('Invalid Creadentials')
+    

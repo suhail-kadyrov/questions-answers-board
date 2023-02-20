@@ -8,7 +8,7 @@ from authentication.models import CustomUser
 class CustomUserAdmin(UserAdmin):
     fieldsets = (
         (None, {"fields": ("email", "password", "auth_provider")}),
-        (_("Personal info"), {"fields": ("full_name", "image")}),
+        (_("Personal info"), {"fields": ("full_name", "image", "face",)}),
         (
             _("Permissions"),
             {
@@ -26,7 +26,7 @@ class CustomUserAdmin(UserAdmin):
         (_("Important dates"), {"fields": ("last_login", "date_joined")}),
     )
     add_fieldsets = (
-        (None, {"classes": ("wide",), "fields": ("email", "full_name", "role", "auth_provider", "image", "password1", "password2")}),
+        (None, {"classes": ("wide",), "fields": ("email", "full_name", "role", "auth_provider", "image", "face", "password1", "password2")}),
     )
     list_display = ("email", "full_name", "role", "auth_provider", "is_verified", "is_staff")
     search_fields = ("email", "full_name")
