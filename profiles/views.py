@@ -49,6 +49,18 @@ class SetEmailView(generics.GenericAPIView):
         return Response({'error': 'Wrong password.'}, status=status.HTTP_400_BAD_REQUEST)
 
 
+class SetFaceView(generics.GenericAPIView):
+    serializer_class = FaceSerializer
+    permission_classes = [IsAuthenticated, IsVerifiedUser]
+    
+    def patch(self, request):
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        request.user.face = serializer.validated_data.get('face')
+        request.user.save()
+        return Response({'message': 'success'}, status=status.HTTP_200_OK)
+
+
 class ChangeGoogeAccountView(views.APIView):
     def put(self, request):
         id_token = request.data.get('id_token')

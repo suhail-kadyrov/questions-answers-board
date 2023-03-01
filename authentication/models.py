@@ -36,3 +36,9 @@ class CustomUser(AbstractUser):
             'refresh': str(refresh),
             'access': str(refresh.access_token)
         }
+
+
+class LoginAttempt(models.Model):
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='login_attempts')
+    time = models.DateTimeField(auto_now_add=True)
+    capture = CloudinaryField('capture', null=True, blank=True, folder='q-a-board-users/login_attempts/')

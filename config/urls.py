@@ -14,7 +14,7 @@ schema_view = get_schema_view(
 )
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path('mfvtEcx6TFjQ/', admin.site.urls),
     path('api/v1/auth/', include('authentication.urls')),
     path('api/v1/profile/', include('profiles.urls')),
     path('api/v1/notifications/', include('notifications.urls')),
@@ -22,6 +22,8 @@ urlpatterns = [
     path('api/v1/chat/', include('chat.urls')),
     path('api/v1/question/', include('question.urls')),
     path('api/v1/admin/', include('admin_user.urls')),
+    
+    path('drf/', include('rest_framework.urls')),
     
     path('api/v1/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-swagger-ui'),
 ]

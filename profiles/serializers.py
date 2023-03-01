@@ -7,10 +7,11 @@ class ProfileSerializer(serializers.ModelSerializer):
     auth_provider = serializers.CharField(read_only=True)
     role = serializers.CharField(read_only=True)
     image = serializers.ImageField(allow_empty_file=True, use_url=True, read_only=True)
+    face = serializers.ImageField(allow_empty_file=True, use_url=True, read_only=True)
 
     class Meta:
         model = CustomUser
-        fields = ['id', 'email', 'auth_provider', 'full_name', 'role', 'image']
+        fields = ['id', 'email', 'auth_provider', 'full_name', 'role', 'image', 'face']
 
 
 class ImageSerializer(serializers.ModelSerializer):
@@ -19,7 +20,15 @@ class ImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
         fields = ['image']
-    
+
+
+class FaceSerializer(serializers.ModelSerializer):
+    face = serializers.ImageField(allow_empty_file=True, use_url=True, required=False)
+
+    class Meta:
+        model = CustomUser
+        fields = ['face']
+
 
 class PasswordSerializer(serializers.Serializer):
     old_password = serializers.CharField(min_length=1, max_length=32)

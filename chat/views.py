@@ -49,7 +49,7 @@ class MessageCreateView(generics.GenericAPIView):
         channel_layer = get_channel_layer()
         if message.sender.role == 'PROFESSOR':
             if message.reply_to_message:
-                question = Question.objects.get(question=message.reply_to_message.text)
+                question = Question.objects.get(question=message.reply_to_message.text, professor=message.sender)
                 question.answer = message.text
                 question.save()
                 Notification.objects.create(
@@ -121,7 +121,7 @@ class MessageUpdateDestroyView(generics.GenericAPIView):
         channel_layer = get_channel_layer()
         if message.sender.role == 'PROFESSOR':
             if message.reply_to_message:
-                question = Question.objects.get(question=message.reply_to_message.text)
+                question = Question.objects.get(question=message.reply_to_message.text, professor=message.sender)
                 question.answer = message.text
                 question.save()
             group_name = f'STUDENT_{message.thread.student.id}'

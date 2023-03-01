@@ -1,4 +1,4 @@
-from authentication.models import CustomUser
+from authentication.models import *
 from course.models import Course
 from course.serializers import CoursesListSerializers
 from django.shortcuts import get_object_or_404
@@ -8,7 +8,7 @@ from rest_framework.response import Response
 
 from .models import AutoAnswerSetting
 from .permissions import IsAdmin
-from .serializers import AdminCourseDetailSerializer, UsersListSerializer
+from .serializers import *
 
 
 class AdminCoursesListView(generics.ListAPIView):
@@ -33,6 +33,12 @@ class AdminStudentsListView(generics.ListAPIView):
     permission_classes = [permissions.IsAuthenticated, IsVerifiedUser, IsAdmin]
     filter_backends = [filters.SearchFilter,]
     search_fields = ['full_name', 'email',]
+
+
+class LoginAttemptsListView(generics.ListAPIView):
+    queryset = LoginAttempt.objects.all()
+    serializer_class = LoginAttemptsSerializer
+    permission_classes = [permissions.IsAuthenticated, IsVerifiedUser, IsAdmin]
 
 
 class AutoAnswerSettingsView(views.APIView):

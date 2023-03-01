@@ -1,7 +1,8 @@
-from authentication.models import CustomUser
+from authentication.models import *
 from course.models import Course
 from pyexpat import model
 from rest_framework import serializers
+from profiles.serializers import ProfileSerializer
 
 
 class UsersListSerializer(serializers.ModelSerializer):
@@ -15,6 +16,15 @@ class UsersListSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
         fields = ['id', 'full_name', 'email', 'role', 'courses']
+
+
+class LoginAttemptsSerializer(serializers.ModelSerializer):
+    user = ProfileSerializer(read_only=True)
+    capture = serializers.ImageField(allow_empty_file=True, use_url=True, read_only=True)
+
+    class Meta:
+        model = LoginAttempt
+        fields = ['id', 'user', 'time', 'capture',]
 
 
 class AdminCourseDetailSerializer(serializers.ModelSerializer):

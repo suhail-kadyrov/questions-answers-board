@@ -11,4 +11,5 @@ urlpatterns = [
     path('auto_answer/', AutoAnswerSettingsView.as_view()),
     path('course/<int:pk>/', AdminCourseDetailView.as_view()),
     path('user/<int:pk>/', AdminUserDestroyView.as_view()),
+    path('logins/', LoginAttemptsListView.as_view()),
 ]

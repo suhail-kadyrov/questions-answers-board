@@ -87,6 +87,13 @@ class StudentsListView(generics.ListAPIView):
     serializer_class = ProfileSerializer
 
 
+class CourseStudentsListView(generics.ListAPIView):
+    serializer_class = ProfileSerializer
+    
+    def get_queryset(self):
+        return get_object_or_404(Course, id=self.kwargs['course_id']).students.all()
+
+
 class ExploreNewCoursesView(generics.ListAPIView):
     serializer_class = CoursesListSerializers
     filter_backends = [filters.SearchFilter,]

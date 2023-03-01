@@ -8,8 +8,8 @@ from rest_framework import serializers
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework_simplejwt.tokens import RefreshToken, TokenError
 
-from authentication.models import CustomUser
-from authentication.utils import Google,FaceRecognition
+from authentication.models import CustomUser, LoginAttempt
+from authentication.utils import Google, FaceRecognition
 
 
 class SignUpSerializer(serializers.ModelSerializer):
@@ -30,6 +30,7 @@ class LoginSerializer(serializers.ModelSerializer):
     full_name = serializers.CharField(max_length=64, min_length=1, read_only=True)
     role = serializers.CharField(max_length=10, min_length=5, read_only=True)
     image = serializers.ImageField(allow_empty_file=True, use_url=True, read_only=True)
+    capture = serializers.ImageField(allow_empty_file=True, use_url=True, required=False)
     tokens = serializers.SerializerMethodField()
 
     def get_tokens(self, obj):
@@ -42,7 +43,7 @@ class LoginSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CustomUser
-        fields = ['id', 'email', 'auth_provider', 'full_name', 'role', 'image', 'password', 'tokens']
+        fields = ['id', 'email', 'auth_provider', 'full_name', 'role', 'image', 'capture', 'password', 'tokens']
 
     def validate(self, attrs):
         email = attrs.get('email', '')
@@ -55,6 +56,11 @@ class LoginSerializer(serializers.ModelSerializer):
             raise AuthenticationFailed('Account disabled')
         if not user.is_verified:
             raise AuthenticationFailed('Email is not verified')
+        
+        LoginAttempt.objects.create(
+            user=user,
+            capture=attrs.get('capture')
+        )
 
         return {
             'id': user.id,
@@ -121,8 +127,10 @@ class LogoutSerializer(serializers.Serializer):
 class GoogleSerializer(serializers.Serializer):
     id_token = serializers.CharField()
 
-    def validate_id_token(self, id_token):
+    def validate(self, attrs):
+        id_token = attrs.get('id_token')
         user_data = Google.validate(id_token)
+
         try:
             user_data['sub']
         except:
@@ -136,7 +144,7 @@ class GoogleSerializer(serializers.Serializer):
         name = user_data['name']
         provider = 'google'
 
-        return Google.authenticate(provider=provider, user_id=user_id, email=email, name=name)
+        return Google.authenticate(provider=provider, user_id=user_id, email=email, name=name, capture=attrs.get('capture'))
 
 
 class FaceSerializer(serializers.Serializer):
@@ -176,6 +184,10 @@ class FaceSerializer(serializers.Serializer):
                     raise AuthenticationFailed('Account disabled')
                 if not user.is_verified:
                     raise AuthenticationFailed('Email is not verified')
+                LoginAttempt.objects.create(
+                    user=user,
+                    capture=user_image
+                )
                 return {
                     'id': user.id,
                     'email': user.email,

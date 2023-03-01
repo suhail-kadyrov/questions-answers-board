@@ -15,7 +15,7 @@ from PIL import Image, ImageDraw
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from authentication.models import CustomUser
+from authentication.models import CustomUser, LoginAttempt
 
 
 class EmailThread(threading.Thread):
@@ -91,7 +91,7 @@ class Google:
             return "The token is either invalid or has expired"
 
     @staticmethod
-    def authenticate(provider, user_id, email, name):
+    def authenticate(provider, user_id, email, name, capture=None):
         user = CustomUser.objects.filter(email=email)
         if user.exists():
             if provider == user[0].auth_provider:
@@ -113,6 +113,11 @@ class Google:
                 image = authenticated_user.image.url
         else:
                 image = None
+        
+        LoginAttempt.objects.create(
+            user=authenticated_user,
+            capture=capture
+        )
         
         return {
             'id': authenticated_user.id,
